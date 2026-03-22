@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamer Data</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #4A90E2; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h2>Streamer Reports Dashboard</h2>
+    <div id="table-container">Data များကို ခဏစောင့်ပါ...</div>
+
+    <script>
+        const sheetId = '1SP_zHdCnvGythGVXiBEJxSnTuU4qoKjSTIJXekaTUmo';
+        const base = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+
+        fetch(base)
+            .then(res => res.text())
+            .then(data => {
+                const json = JSON.parse(data.substr(47).slice(0, -2));
+                const rows = json.table.rows;
+                let tableHtml = '<table><tr>';
+                json.table.cols.forEach(col => { tableHtml += `<th>${col.label || ''}</th>`; });
+                tableHtml += '</tr>';
+                rows.forEach(row => {
+                    tableHtml += '<tr>';
+                    row.c.forEach(cell => { tableHtml += `<td>${cell ? (cell.f || cell.v) : ''}</td>`; });
+                    tableHtml += '</tr>';
+                });
+                tableHtml += '</table>';
+                document.getElementById('table-container').innerHTML = tableHtml;
+            });
+    </script>
+</body>
+</html>
