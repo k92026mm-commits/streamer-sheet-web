@@ -31,11 +31,17 @@
     <div class="header">
         <h2>Dashboard</h2>
         <div>
-            <label style="margin-right: 10px;">လရွေးချယ်ရန်:</label>
+            <label style="margin-right: 10px;">Select month:</label>
             <select id="monthSelector" onchange="fetchData()">
-                <option value="0">April 2026</option>
-                <option value="693670032">May 2026</option>
-                <option value="2122548177">June 2026</option>
+                <option value="4/2026">April 2026</option>
+                <option value="5/2026">May 2026</option>
+                <option value="6/2026">June 2026</option>
+                <option value="7/2026">July 2026</option>
+                <option value="8/2026">August 2026</option>
+                <option value="9/2026">September 2026</option>
+                <option value="10/2026">October 2026</option>
+                <option value="11/2026">November 2026</option>
+                <option value="12/2026">December 2026</option>
             </select>
         </div>
     </div>
@@ -53,8 +59,29 @@
     <script>
         const sheetId = '1SP_zHdCnvGythGVXiBEJxSnTuU4qoKjSTIJXekaTUmo'; 
 
+        // --- လအလိုက် GID နံပါတ်များ ထည့်ရန် နေရာ (ဒီမှာ ပြင်ပေးရုံပါပဲ) ---
+        const gidMap = {
+            "4/2026": "0",
+            "5/2026": "693670032",
+            "6/2026": "2122548177",
+            "7/2026": "GID_HERE", // လအသစ်ရှိရင် ဒီမှာ GID ထည့်ပါ
+            "8/2026": "GID_HERE",
+            "9/2026": "GID_HERE",
+            "10/2026": "GID_HERE",
+            "11/2026": "GID_HERE",
+            "12/2026": "GID_HERE"
+        };
+
         function fetchData() {
-            const gid = document.getElementById('monthSelector').value;
+            const selectedMonth = document.getElementById('monthSelector').value;
+            const gid = gidMap[selectedMonth];
+
+            // GID မရှိသေးလျှင်
+            if (!gid || gid === "GID_HERE") {
+                document.getElementById('table-container').innerHTML = "<p style='padding:20px; color:red;'>ဤလအတွက် GID မသတ်မှတ်ရသေးပါ။</p>";
+                return;
+            }
+
             const base = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
 
             fetch(base)
@@ -68,8 +95,9 @@
 
                     rows.forEach((row, index) => {
                         const d = row.c;
-                        // Filter empty rows, Total rows, and last row
-                        if (!d || !d[0] || (d[1] && d[1].v == "Total") || index === rows.length - 1) return;
+
+                        // Header တန်း၊ Total အတန်း နှင့် နောက်ဆုံးအတန်းများကို ကျော်ရန်
+                        if (!d || !d[0] || d[1]?.v === "Streamer" || (d[1] && d[1].v == "Total") || index === rows.length - 1) return;
 
                         const dep = (d[2] && d[2].v !== null) ? parseFloat(d[2].v) : 0;
                         const wit = (d[3] && d[3].v !== null) ? parseFloat(d[3].v) : 0;
